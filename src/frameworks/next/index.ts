@@ -7,10 +7,9 @@ import type { PrerenderManifest } from "next/dist/build";
 import type { DomainLocale } from "next/dist/server/config";
 import type { PagesManifest } from "next/dist/build/webpack/plugins/pages-manifest-plugin";
 import { copy, mkdirp, pathExists, pathExistsSync } from "fs-extra";
-import { pathToFileURL, parse } from "url";
+import { pathToFileURL } from "url";
 import { existsSync } from "fs";
 import { gte } from "semver";
-import { IncomingMessage, ServerResponse } from "http";
 import * as clc from "colorette";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
@@ -28,6 +27,7 @@ import {
   relativeRequire,
   findDependency,
   validateLocales,
+  getNodeModuleBin,
 } from "../utils";
 import { BuildResult, FrameworkType, SupportLevel } from "../interfaces";
 
@@ -568,21 +568,25 @@ export async function getDevModeHandle(dir: string, _: string, hostingEmulatorIn
     }
   }
 
-  let next = relativeRequire(dir, "next");
-  if ("default" in next) next = next.default;
-  const nextApp = next({
-    dev: true,
-    dir,
-    hostname: hostingEmulatorInfo?.host,
-    port: hostingEmulatorInfo?.port,
-  });
-  const handler = nextApp.getRequestHandler();
-  await nextApp.prepare();
+  const host = new Promise<string>((resolve, reject) => {
+    const cli = getNodeModuleBin("next", dir);
+    const serve = spawn(cli, ["dev"], { cwd: dir });
 
-  return simpleProxy(async (req: IncomingMessage, res: ServerResponse) => {
-    const parsedUrl = parse(req.url!, true);
-    await handler(req, res, parsedUrl);
+    serve.stdout.on("data", (data: any) => {
+      process.stdout.write(data);
+      const match = data.toString().match(/(http:\/\/.+:\d+)/);
+
+      if (match) resolve(match[1]);
+    });
+
+    serve.stderr.on("data", (data: any) => {
+      process.stderr.write(data);
+    });
+
+    serve.on("exit", reject);
   });
+
+  return simpleProxy(await host);
 }
 
 async function getConfig(
