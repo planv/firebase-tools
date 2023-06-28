@@ -8,7 +8,6 @@ import { RequireAtLeastOne } from "./metaprogramming";
 import type { HttpsOptions } from "firebase-functions/v2/https";
 import { IngressSetting, MemoryOption, VpcEgressSetting } from "firebase-functions/v2/options";
 // Sourced from - https://docs.microsoft.com/en-us/javascript/api/@azure/keyvault-certificates/requireatleastone?view=azure-node-latest
-import { Emulators } from "./emulator/types";
 
 // should be sourced from - https://github.com/firebase/firebase-tools/blob/master/src/deploy/functions/runtimes/index.ts#L15
 type CloudFunctionRuntimes =
@@ -182,48 +181,48 @@ export type RemoteConfigConfig = {
 } & Deployable;
 
 export type EmulatorsConfig = {
-  [Emulators.AUTH]?: {
+  auth?: {
     host?: string;
     port?: number;
   };
-  [Emulators.DATABASE]?: {
+  database?: {
     host?: string;
     port?: number;
   };
-  [Emulators.FIRESTORE]?: {
+  firestore?: {
     host?: string;
     port?: number;
     websocketPort?: number;
   };
-  [Emulators.FUNCTIONS]?: {
+  functions?: {
     host?: string;
     port?: number;
   };
-  [Emulators.HOSTING]?: {
+  hosting?: {
     host?: string;
     port?: number;
   };
-  [Emulators.PUBSUB]?: {
+  pubsub?: {
     host?: string;
     port?: number;
   };
-  [Emulators.STORAGE]?: {
+  storage?: {
     host?: string;
     port?: number;
   };
-  [Emulators.REMOTE_CONFIG]?: {
+  remoteconfig?: {
     host?: string;
     port?: number;
   };
-  [Emulators.LOGGING]?: {
+  logging?: {
     host?: string;
     port?: number;
   };
-  [Emulators.HUB]?: {
+  hub?: {
     host?: string;
     port?: number;
   };
-  [Emulators.UI]?: {
+  ui?: {
     enabled?: boolean;
     host?: string;
     port?: number | string;
